@@ -1,11 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.trucoargento.modelo;
 
 import java.util.Arrays;
+import javax.websocket.Session;
 
 
 /**
@@ -15,30 +11,32 @@ import java.util.Arrays;
 public class Jugador {
     
     private String nombre;
-
     private Carta[] cartas = new Carta[ITruco.CARTASXJUGADOR];
-
     private int indiceCarta = 0;
-
+    private Session sesion;
     // Constructor
 
     public Jugador() {
         this("");
     }
 
+    public Jugador(Session s) {
+        
+    }
+    
     public Jugador(String nombre) {
         this.nombre = nombre;
     }
 
     // Getters
     public String getNombre() { return nombre; }
-
     public Carta[] getCartas() { return cartas; }
-
+    public Session getSesion() { return sesion; }
+    
     // Setters
     public void setNombre(String nombre) { this.nombre = nombre; }
-
-
+    public void setSesion(Session sesion) { this.sesion = sesion; }
+    
     // Customs
 
     public void recibirCarta( Carta cartaDelMazo) {

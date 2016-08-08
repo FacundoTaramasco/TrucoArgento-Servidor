@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.trucoargento.modelo;
 
 import java.util.Arrays;
@@ -62,6 +57,10 @@ public class Truco {
         this.mostrarMazoCustom();
         System.out.println("*******************************************************\n");
 
+        jugadorUno = new Jugador();
+        jugadorDos = new Jugador();
+        
+        /*
         jugadorUno = new Jugador("Facu");
         jugadorDos = new Jugador("IA");
 
@@ -69,13 +68,33 @@ public class Truco {
         System.out.println(jugadorUno);
         System.out.println(jugadorDos);
         System.out.println("*******************************************************\n");
+        */
+    }
     
+    // Getters
+    public Jugador getJugadorUno() {
+        return jugadorUno;
+    }
+    
+    public Jugador getJugadorDos() {    
+        return jugadorDos;
     }
 
+    // Setters
+    public void setJugadorUno(Jugador jugadorUno) {
+        this.jugadorUno = jugadorUno;
+    }
+
+    public void setJugadorDos(Jugador jugadorDos) {
+        this.jugadorDos = jugadorDos;
+    }
+    
+    // Customs
     /**
      * A jugar!
-     */
+     
     public void jugar() {
+        
         estadoJuego = true;
 
         System.out.println("Entregando cartas a los jugadores...");
@@ -88,7 +107,8 @@ public class Truco {
         this.mostrarMazoCustom();
 
     }
-
+    */
+    
     /**
      * Metodo que genera el mazo de cartas
      */
@@ -189,4 +209,6 @@ public class Truco {
             System.out.println(e.getKey() + " " + e.getValue());
         }
     }
+    
+    
 }
