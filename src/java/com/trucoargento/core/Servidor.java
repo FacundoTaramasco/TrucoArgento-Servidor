@@ -7,6 +7,7 @@ package com.trucoargento.core;
 
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 /**
@@ -17,10 +18,15 @@ import javax.websocket.server.ServerEndpoint;
 public class Servidor {
 
     @OnMessage
-    public String onMessage(String message) {
-        return null;
+    public String onMessage(Session s, String mensaje) {
+        System.out.println("sesion : " + s + " envia : " + mensaje);
+        
+        return "recibido";
     }
     
-
+    @OnOpen
+    public void onOpen(Session s) {
+        System.out.println("sesion  : " + s + " connectada.");
+    }
     
 }
