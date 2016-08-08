@@ -5,6 +5,11 @@
  */
 package com.trucoargento.core;
 
+import com.trucoargento.modelo.Truco;
+import javax.websocket.CloseReason;
+import javax.websocket.Endpoint;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -17,16 +22,37 @@ import javax.websocket.server.ServerEndpoint;
 @ServerEndpoint("/TrucoArgento")
 public class Servidor {
 
-    @OnMessage
-    public String onMessage(Session s, String mensaje) {
-        System.out.println("sesion : " + s + " envia : " + mensaje);
+
+       
+  
+    public Servidor() {
+        //System.out.println("Iniciando servidor...");
+        Truco t = Truco.getInstance();
+        //Truco t = new Truco();
         
-        return "recibido";
+        //t.jugar();
     }
     
     @OnOpen
     public void onOpen(Session s) {
         System.out.println("sesion  : " + s + " connectada.");
+        
+        
+    }
+
+    @OnMessage
+    public String onMessage(String mensaje, Session s) {
+        System.out.println("sesion : " + s + " envia : " + mensaje);
+        return "recibido";
     }
     
+    @OnClose
+    public void close(Session session) {
+        System.out.println(session + " cerrada");
+    }
+
+    @OnError
+    public void onError(Throwable error) {
+        System.out.println("ERROR " + error);
+    }
 }

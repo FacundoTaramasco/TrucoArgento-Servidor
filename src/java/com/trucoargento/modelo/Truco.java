@@ -28,8 +28,12 @@ public class Truco {
 
     private boolean estadoJuego;
 
+    private static final Truco truco = new Truco();
+    
+    public static Truco getInstance() { return truco; }
+    
     // Constructor
-    public Truco() {
+    private Truco() {
         init();
     }
 
