@@ -11,7 +11,7 @@ import javax.websocket.server.ServerEndpoint;
 
 /**
  *
- * @author Usuario
+ * @author FacundoTaramasco
  */
 @ServerEndpoint("/TrucoArgento")
 public class Servidor {
