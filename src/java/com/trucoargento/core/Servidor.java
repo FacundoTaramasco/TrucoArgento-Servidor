@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trucoargento.modelo.Carta;
 import com.trucoargento.modelo.NumeroCarta;
 import com.trucoargento.modelo.Palos;
+import com.trucoargento.util.Utileria;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,53 +45,18 @@ public class Servidor {
         t = Truco.getInstance();
 
     }
-    
+
     @OnOpen
     public void onOpen(Session s) {
         // se conecto jugador uno
         if (t.getJugadorUno().getSesion() == null) {
-            t.getJugadorUno().setSesion(s);
-            System.out.println("Entro jugador uno");
-            try {                
-                JsonProvider provider = JsonProvider.provider();
-                JsonObject mensajeJson = provider.createObjectBuilder()
-                    .add("accion", "espera")
-                    .add("mensaje", "esperando jugador Dos")
-                    .build();
-                s.getBasicRemote().sendText(mensajeJson.toString());
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            this.jugadorUnoConectado(s);
+            
         // se conecto jugador dos
         } else if (t.getJugadorDos().getSesion() == null) {
-            t.getJugadorDos().setSesion(s);
-            System.out.println("Entro jugador dos");
+            this.jugadorDosConectado(s);
+            this.jugadoresConectados();
             
-            this.darCartasJugadores();
-
-            try {
-                JsonProvider provider = JsonProvider.provider();
-                JsonObject mensajeJsonJ1 = provider.createObjectBuilder()
-                    .add("accion", "a_jugar")
-                    .add("href", "pantallaJuego.html")
-                    .add("cartas", this.cartasToJson(t.getJugadorUno()))
-                    //.add("mensaje", "el juego comenzara!")
-                    .build();
-
-                JsonObject mensajeJsonJ2 = provider.createObjectBuilder()
-                    .add("accion", "a_jugar")
-                    .add("href", "pantallaJuego.html")
-                    .add("cartas", this.cartasToJson(t.getJugadorDos()))
-                    //.add("mensaje", "el juego comenzara!")
-                    .build();
-                
-                t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJsonJ1.toString());
-                t.getJugadorDos().getSesion().getBasicRemote().sendText(mensajeJsonJ2.toString());
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-
         } else {
             System.out.println("No se aceptan mas jugadores!");
         }
@@ -104,7 +70,6 @@ public class Servidor {
             
             JsonReader reader = Json.createReader(new StringReader(mensaje));
             JsonObject mensajeJson = reader.readObject();
-            
             if (mensajeJson.getString("accion").equals("entraJuego")) {
                 // seteando nombre del jugador
                 t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
@@ -115,10 +80,8 @@ public class Servidor {
         
         // mensaje de jugador dos
         if (t.getJugadorDos().getSesion() == s) {
-            
             JsonReader reader = Json.createReader(new StringReader(mensaje));
             JsonObject mensajeJson = reader.readObject();
-            
             if (mensajeJson.getString("accion").equals("entraJuego")) {
                 // seteando nombre del jugador
                 t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
@@ -144,21 +107,79 @@ public class Servidor {
     public void onError(Throwable error) {
         System.out.println("ERROR " + error);
     }
-        
+     
+    
+    /*
+    Metodo invocado al momento de conectarse el jugador uno
+    */
+    private void jugadorUnoConectado(Session s) {
+        t.getJugadorUno().setSesion(s);
+        System.out.println("Entro jugador uno");
+        this.mensajeEsperaJugadorUno();
+    }
+    
+    /*
+    cuando se conecta el jugador uno se le envia un mensaje indicando
+    la espera por la conexion del jugador dos
+    */
+    private void mensajeEsperaJugadorUno() {
+        try {                
+            JsonProvider provider = JsonProvider.provider();
+            JsonObject mensajeJson = provider.createObjectBuilder()
+                .add("accion", "espera")
+                .add("mensaje", "esperando jugador Dos")
+                .build();
+            t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJson.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /*
+    Metodo invocado al momento de conectarse el jugador dos
+    */
+    private void jugadorDosConectado(Session s) {
+        t.getJugadorDos().setSesion(s);
+        System.out.println("Entro jugador dos");
+    }
+    
+    /*
+    se le entregan las cartas a los jugadores (servidor)
+    */
     private void darCartasJugadores() {
         t.darCartasJugador(t.getJugadorUno());
         t.darCartasJugador(t.getJugadorDos());
     }
     
-    private String cartasToJson(Jugador j) {
-        ObjectMapper mapper = new ObjectMapper();
+    /*
+    Metodo invocado cuando se encuentran conectados los dos jugadores
+    */
+    private void jugadoresConectados() {
+        this.darCartasJugadores();
+
+        // ya entregadas las cartas a los jugadores (servidor) se le 
+        // envia dichas cartas a cada jugador (cliente) en formato json
         try {
-            String jsonInString = mapper.writeValueAsString( j.getCartas());
-           return jsonInString;
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+            JsonProvider provider = JsonProvider.provider();
+            JsonObject mensajeJsonJ1 = provider.createObjectBuilder()
+                .add("accion", "a_jugar")
+                .add("href", "pantallaJuego.html")
+                .add("cartas", Utileria.cartasToJson(t.getJugadorUno()))
+                //.add("mensaje", "el juego comenzara!")
+                .build();
+
+            JsonObject mensajeJsonJ2 = provider.createObjectBuilder()
+                .add("accion", "a_jugar")
+                .add("href", "pantallaJuego.html")
+                .add("cartas", Utileria.cartasToJson(t.getJugadorDos()))
+                //.add("mensaje", "el juego comenzara!")
+                .build();
+
+            t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJsonJ1.toString());
+            t.getJugadorDos().getSesion().getBasicRemote().sendText(mensajeJsonJ2.toString());
+        } catch(IOException e) {
+            e.printStackTrace();
         }
-        return "";
     }
     
 }

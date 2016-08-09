@@ -162,7 +162,7 @@ public class Truco {
             if ( c.getValor().getValor() == 5) jerarquiaCartas.put(c, 13);
         // todos los 4
         for (Carta c : mazoCartas)
-            if ( c.getValor().getValor() == 4) jerarquiaCartas.put(c,14);
+            if ( c.getValor().getValor() == 4) jerarquiaCartas.put(c, 14);
     }
 
     /**
