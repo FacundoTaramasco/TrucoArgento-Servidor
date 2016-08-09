@@ -89,6 +89,9 @@ public class Truco {
         this.jugadorDos = jugadorDos;
     }
     
+    
+    
+   
     // Customs
     /**
      * A jugar!
@@ -173,7 +176,7 @@ public class Truco {
      * Metodo que le entrega ITruco.CARTASXJUGADOR cartas random del mazo al jugador especificado.
      * @param j Jugador que recibe las cartas.
      */
-    private void darCartasJugador(Jugador j) {
+    public void darCartasJugador(Jugador j) {
         Random r = new Random();
         Carta carta;
         int indice;
