@@ -10,23 +10,16 @@ import com.trucoargento.modelo.Jugador;
 import com.trucoargento.modelo.Truco;
 import java.io.IOException;
 import java.io.StringReader;
-import java.math.BigDecimal;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.spi.JsonProvider;
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trucoargento.modelo.Carta;
-import com.trucoargento.modelo.NumeroCarta;
-import com.trucoargento.modelo.Palos;
 import com.trucoargento.util.Utileria;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +31,8 @@ import java.util.logging.Logger;
 @ServerEndpoint("/TrucoArgento")
 public class Servidor {
     
-    private Truco t;
+    private static final Logger LOGGER = Logger.getLogger(Servidor.class.getName());
+    private final Truco t;
   
     public Servidor() {
         //System.out.println("Iniciando servidor...");
@@ -58,7 +52,7 @@ public class Servidor {
             this.jugadoresConectados();
             
         } else {
-            System.out.println("No se aceptan mas jugadores!");
+            LOGGER.info("No se aceptan mas jugadores!");
         }
     }
 
@@ -73,7 +67,7 @@ public class Servidor {
             if (mensajeJson.getString("accion").equals("entraJuego")) {
                 // seteando nombre del jugador
                 t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
-                System.out.println("jugador uno se llama : " +  mensajeJson.getString("nombre"));
+                LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
             }
 
         }
@@ -85,7 +79,7 @@ public class Servidor {
             if (mensajeJson.getString("accion").equals("entraJuego")) {
                 // seteando nombre del jugador
                 t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
-                System.out.println("jugador dos se llama : " +  mensajeJson.getString("nombre"));
+                LOGGER.log(Level.INFO, "jugador dos se llama : {0}", mensajeJson.getString("nombre"));
             }
         }
         return "";
@@ -94,18 +88,19 @@ public class Servidor {
     @OnClose
     public void close(Session s) {
         if (t.getJugadorUno().getSesion() == s) {
-            System.out.println("Jugador uno salio");
+            LOGGER.info("Jugador uno salio");
             t.getJugadorUno().setSesion(null);
         }
         if (t.getJugadorDos().getSesion() == s) {
-            System.out.println("Jugador dos salio");
+            LOGGER.info("Jugados dos salio");
             t.getJugadorDos().setSesion(null);
         }
     }
 
     @OnError
     public void onError(Throwable error) {
-        System.out.println("ERROR " + error);
+        LOGGER.log(Level.INFO, "ERROR {0}", error);
+
     }
      
     
@@ -114,7 +109,7 @@ public class Servidor {
     */
     private void jugadorUnoConectado(Session s) {
         t.getJugadorUno().setSesion(s);
-        System.out.println("Entro jugador uno");
+        LOGGER.info("Entro jugador uno");
         this.mensajeEsperaJugadorUno();
     }
     
@@ -131,7 +126,7 @@ public class Servidor {
                 .build();
             t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJson.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
     
@@ -140,7 +135,7 @@ public class Servidor {
     */
     private void jugadorDosConectado(Session s) {
         t.getJugadorDos().setSesion(s);
-        System.out.println("Entro jugador dos");
+        LOGGER.info("Entro jugador dos");
     }
     
     /*
@@ -178,7 +173,7 @@ public class Servidor {
             t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJsonJ1.toString());
             t.getJugadorDos().getSesion().getBasicRemote().sendText(mensajeJsonJ2.toString());
         } catch(IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
     
