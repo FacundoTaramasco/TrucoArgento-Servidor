@@ -7,6 +7,7 @@ package com.trucoargento.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trucoargento.modelo.Jugador;
+import com.trucoargento.modelo.Palos;
 import com.trucoargento.modelo.Truco;
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,6 +22,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import com.trucoargento.util.Utileria;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,7 +76,6 @@ public class Servidor {
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador dos canta envido!");
                 }
-
             }
 
             // mensaje de jugador dos
@@ -87,7 +88,9 @@ public class Servidor {
                 
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador dos canta envido!");
+                    TreeMap<Palos, Integer> ret = t.determinarEnvidoJugador(t.getJugadorDos());
                     
+                    System.out.println("Tu envido es de : " + ret.get( ret.firstKey()) + " de : " + ret.firstEntry());
                     JsonProvider provider = JsonProvider.provider();
                     JsonObject msgJ       = provider.createObjectBuilder()
                         .add("accion", "cantoEnvido")
@@ -169,7 +172,7 @@ public class Servidor {
         this.darCartasJugadores();
 
         // ya entregadas las cartas a los jugadores (servidor) se le 
-        // envia dichas cartas a cada jugador (cliente) en formato json
+        // envian dichas cartas a cada jugador (cliente) en formato json
 
         JsonProvider provider = JsonProvider.provider();
         JsonObject mensajeJsonJ1 = provider.createObjectBuilder()
@@ -188,9 +191,6 @@ public class Servidor {
 
         mensajeAjugador(t.getJugadorUno(), mensajeJsonJ1.toString());
         mensajeAjugador(t.getJugadorDos(), mensajeJsonJ2.toString());
-        //t.getJugadorUno().getSesion().getBasicRemote().sendText(mensajeJsonJ1.toString());
-        //t.getJugadorDos().getSesion().getBasicRemote().sendText(mensajeJsonJ2.toString());
-
     }
     
     private void mensajeAjugador(Jugador j, String msgJson) {
