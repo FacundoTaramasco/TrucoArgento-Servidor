@@ -192,6 +192,7 @@ public class Truco {
         }
     }
 
+    /*
     public TreeMap<Palos, Integer> determinarEnvidoJugador(Jugador j) {
         int dosCartasMismoPaloORO    = 0;
         int dosCartasMismoPaloBASTO  = 0;
@@ -269,7 +270,9 @@ public class Truco {
         ret.put(p, acc);
         return ret;
     }
+    */
     
+    /*
     private boolean tieneFlor(Jugador j) {
         int accBasto = 0;
         int accOro = 0;
@@ -295,9 +298,85 @@ public class Truco {
                 accEspada == j.getCartas().size() ||
                    accOro == j.getCartas().size() );
     }
+    */
     
-    private void determinarEnvidoJugadorD(Jugador j) {
+    private boolean tieneFlor(Jugador j) {
+        return ( j.getCartas().get(0).getPalo() == j.getCartas().get(1).getPalo() && j.getCartas().get(1).getPalo() == j.getCartas().get(2).getPalo() );
+    }
+    
+    /**
+     * Metodo que retorna booleano si la carta pasada por parametro es una 
+     * 'carta negra' (10, 11 o 12)
+     * @param c
+     * @return 
+     */
+    private boolean cartaNegra(Carta c) {
+        return (c.getValor() == NumeroCarta.DIEZ || c.getValor() == NumeroCarta.ONCE || c.getValor() == NumeroCarta.DOCE);
+    }
         
+    public void determinarEnvidoJugadorD(Jugador j) {
+        int accEnvido = 0;
+        int valorCartaUno = 0;
+        int valorCartaDos = 0;
+        List<Carta> l;
+        // 3 cartas del mismo palo
+        if (tieneFlor(j)) {
+            System.out.println("Tenes flor capo, tomatelas");
+            return;
+        }
+        l = dosCartasMismoPalo(j);
+        // tiene dos cartas del mismo palo
+        if (!l.isEmpty()) {
+            // las dos cartas son 'negras' (10, 11 o 12)
+            if ( cartaNegra(l.get(0)) && cartaNegra(l.get(1)) ) {
+                accEnvido = 20;
+            } else { // o ninguna o alguna de las dos es carta negra
+                   valorCartaUno = cartaNegra(l.get(0)) ? 0 : l.get(0).getValor().getValorEnvido();
+                   valorCartaDos = cartaNegra(l.get(1)) ? 0 : l.get(1).getValor().getValorEnvido(); 
+                   accEnvido     = valorCartaUno + valorCartaDos + 20;
+            }
+        } else { // lista vacia, las 3 cartas son distintas
+            accEnvido = valorEnvidoCartaMasAlta(j);
+        }
+        System.out.println("El envido vale : " + accEnvido);
+    }
+
+    /**
+     * Metodo que retorna una lista con las dos cartas que sean del mismo palo.
+     * En el caso de que no existan dos cartas iguales la lista se retorna vacia.
+     * @param j
+     * @return 
+     */
+    private List<Carta> dosCartasMismoPalo(Jugador j) {
+        List<Carta> lista = new ArrayList();
+        if (j.getCartas().get(0).getPalo() == j.getCartas().get(1).getPalo()) {
+            lista.add(j.getCartas().get(0));
+            lista.add(j.getCartas().get(1));
+        }
+        if (j.getCartas().get(0).getPalo() == j.getCartas().get(2).getPalo() ) {
+            lista.add(j.getCartas().get(0));
+            lista.add(j.getCartas().get(2)); 
+        }
+        if (j.getCartas().get(1).getPalo() == j.getCartas().get(2).getPalo() ) {
+            lista.add(j.getCartas().get(1));
+            lista.add(j.getCartas().get(2));     
+        }
+        return lista;
+    }
+    
+    /**
+     * Si no tiene flor ni dos cartas iguales del mismo palo se toma la carta
+     * mas alta de valor del envido.
+     * @param j
+     * @return 
+     */
+    private int valorEnvidoCartaMasAlta(Jugador j) {
+        int max = j.getCartas().get(0).getValor().getValorEnvido();
+        for (Carta c : j.getCartas()) {
+            if (c.getValor().getValorEnvido() > max)
+                max = c.getValor().getValorEnvido();
+        }
+        return max;
     }
     
     /**
@@ -310,7 +389,6 @@ public class Truco {
         }
         //mazoCartas.addAll(Arrays.asList( jugadorDos.entregarCargas() ));
     }
-
 
     private void mostrarMazoCustom() {
         for (Carta c : mazoCartas) {

@@ -88,9 +88,10 @@ public class Servidor {
                 
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador dos canta envido!");
-                    TreeMap<Palos, Integer> ret = t.determinarEnvidoJugador(t.getJugadorDos());
+                    //TreeMap<Palos, Integer> ret = t.determinarEnvidoJugador(t.getJugadorDos());
                     
-                    System.out.println("Tu envido es de : " + ret.get( ret.firstKey()) + " de : " + ret.firstEntry());
+                    t.determinarEnvidoJugadorD(t.getJugadorDos());
+                    //System.out.println("Tu envido es de : " + ret.get( ret.firstKey()) + " de : " + ret.firstEntry());
                     JsonProvider provider = JsonProvider.provider();
                     JsonObject msgJ       = provider.createObjectBuilder()
                         .add("accion", "cantoEnvido")
