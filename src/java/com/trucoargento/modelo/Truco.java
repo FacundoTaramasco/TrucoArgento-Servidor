@@ -191,6 +191,11 @@ public class Truco {
         }
     }
 
+    public int determinarEnvidoJugador(Jugador j) {
+        
+        return 0;
+    }
+    
     /**
      * Metodo que recibe todas las cartas de j y las agrega al mazo nuevamente
      */
