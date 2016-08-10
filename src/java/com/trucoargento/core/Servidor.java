@@ -37,9 +37,11 @@ public class Servidor {
     public Servidor() {
         //System.out.println("Iniciando servidor...");
         t = Truco.getInstance();
-
     }
 
+    /** #########################################################################  **/
+    /** #########################################################################  **/
+    
     @OnOpen
     public void onOpen(Session s) {
         // se conecto jugador uno
@@ -57,32 +59,30 @@ public class Servidor {
     }
 
     @OnMessage
-    public String onMessage(String mensaje, Session s) {
-        
-        // mensaje de jugador uno
-        if (t.getJugadorUno().getSesion() == s) {
-            
-            JsonReader reader = Json.createReader(new StringReader(mensaje));
+    public void onMessage(String mensaje, Session s) {
+        try (JsonReader reader = Json.createReader(new StringReader(mensaje))) {
             JsonObject mensajeJson = reader.readObject();
-            if (mensajeJson.getString("accion").equals("entraJuego")) {
-                // seteando nombre del jugador
-                t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
-                LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
+
+            // mensaje de jugador uno
+            if (t.getJugadorUno().getSesion() == s) {
+                if (mensajeJson.getString("accion").equals("entraJuego")) {
+                    // seteando nombre del jugador
+                    t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
+                    LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
+                }
+
+            }
+
+            // mensaje de jugador dos
+            if (t.getJugadorDos().getSesion() == s) {
+                if (mensajeJson.getString("accion").equals("entraJuego")) {
+                    // seteando nombre del jugador
+                    t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
+                    LOGGER.log(Level.INFO, "jugador dos se llama : {0}", mensajeJson.getString("nombre"));
+                }
             }
 
         }
-        
-        // mensaje de jugador dos
-        if (t.getJugadorDos().getSesion() == s) {
-            JsonReader reader = Json.createReader(new StringReader(mensaje));
-            JsonObject mensajeJson = reader.readObject();
-            if (mensajeJson.getString("accion").equals("entraJuego")) {
-                // seteando nombre del jugador
-                t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
-                LOGGER.log(Level.INFO, "jugador dos se llama : {0}", mensajeJson.getString("nombre"));
-            }
-        }
-        return "";
     }
     
     @OnClose
@@ -95,6 +95,9 @@ public class Servidor {
             LOGGER.info("Jugados dos salio");
             t.getJugadorDos().setSesion(null);
         }
+        // todos los jugadores devuelven sus cartas
+        t.recibirCartasJugador( t.getJugadorUno() );
+        t.recibirCartasJugador( t.getJugadorDos() );
     }
 
     @OnError
@@ -103,6 +106,8 @@ public class Servidor {
 
     }
      
+    /** #########################################################################  **/
+    /** #########################################################################  **/
     
     /*
     Metodo invocado al momento de conectarse el jugador uno

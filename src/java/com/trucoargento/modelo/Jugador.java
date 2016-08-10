@@ -1,6 +1,8 @@
 package com.trucoargento.modelo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.websocket.Session;
 
 
@@ -11,7 +13,8 @@ import javax.websocket.Session;
 public class Jugador {
     
     private String nombre;
-    private Carta[] cartas = new Carta[ITruco.CARTASXJUGADOR];
+    private List<Carta> cartas = new ArrayList<Carta>();
+    //private Carta[] cartas = new Carta[ITruco.CARTASXJUGADOR];
     private int indiceCarta = 0;
     private Session sesion;
     // Constructor
@@ -30,7 +33,7 @@ public class Jugador {
 
     // Getters
     public String getNombre() { return nombre; }
-    public Carta[] getCartas() { return cartas; }
+    public List<Carta> getCartas() { return cartas; }
     public Session getSesion() { return sesion; }
     
     // Setters
@@ -41,13 +44,14 @@ public class Jugador {
 
     public void recibirCarta( Carta cartaDelMazo) {
         if (indiceCarta == ITruco.CARTASXJUGADOR) return;
-        cartas[indiceCarta] = cartaDelMazo;
+        cartas.add(cartaDelMazo);
+        //cartas[indiceCarta] = cartaDelMazo;
         indiceCarta++;
     }
 
-    public Carta[] entregarCargas() {
-        Carta[] tmp = this.getCartas();
-        this.cartas = null;
+    public List<Carta> entregarCargas() {
+        List<Carta> tmp = this.getCartas();
+        this.cartas = new ArrayList<Carta>();
         indiceCarta = 0;
         return tmp;
     }
@@ -56,7 +60,7 @@ public class Jugador {
     public String toString() {
         return "Jugador{" +
                 "nombre='" + nombre + '\'' +
-                ", cartas=" + Arrays.toString(cartas) +
+                ", cartas=" + cartas +
                 '}';
     }
 }

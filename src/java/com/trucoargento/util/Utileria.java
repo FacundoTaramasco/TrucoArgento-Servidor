@@ -3,7 +3,10 @@ package com.trucoargento.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trucoargento.core.Servidor;
+import com.trucoargento.modelo.Carta;
 import com.trucoargento.modelo.Jugador;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +19,10 @@ public class Utileria {
     public static String cartasToJson(Jugador j) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            String jsonInString = mapper.writeValueAsString( j.getCartas());
+            //List<Carta> l = new ArrayList<Carta>();
+                        
+            String jsonInString = mapper.writeValueAsString( j.getCartas() );
+            System.out.println(jsonInString);
            return jsonInString;
         } catch (JsonProcessingException ex) {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);

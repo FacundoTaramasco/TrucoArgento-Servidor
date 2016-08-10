@@ -182,6 +182,7 @@ public class Truco {
         int indice;
         for (int i = 0; i < ITruco.CARTASXJUGADOR; i++) {
             indice = r.nextInt(mazoCartas.size());
+            System.out.println("tamaño mazo : " + mazoCartas.size() + " indice : " + indice);
             carta = mazoCartas.get(indice);
             j.recibirCarta(carta);
 
@@ -191,11 +192,14 @@ public class Truco {
     }
 
     /**
-     * Metodo que recibe todas las cartas de todos los jugadores y las agrega al mazo nuevamente
+     * Metodo que recibe todas las cartas de j y las agrega al mazo nuevamente
      */
-    private void recibirCartasJugadores() {
-        mazoCartas.addAll(Arrays.asList( jugadorUno.entregarCargas() ));
-        mazoCartas.addAll(Arrays.asList( jugadorDos.entregarCargas() ));
+    public void recibirCartasJugador(Jugador j) {
+        if (j.getCartas() != null) {
+            System.out.println(j.getNombre() + " esta entregando sus cartas");
+            mazoCartas.addAll( j.entregarCargas() );
+        }
+        //mazoCartas.addAll(Arrays.asList( jugadorDos.entregarCargas() ));
     }
 
 
