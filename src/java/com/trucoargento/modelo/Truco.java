@@ -322,6 +322,7 @@ public class Truco {
         // 3 cartas del mismo palo
         if (tieneFlor(j)) {
             System.out.println("Tenes flor capo, tomatelas");
+            System.out.println("La mejor combinacion para envido es : " + valorEnvidoConFlor(j));
             return;
         }
         l = dosCartasMismoPalo(j);
@@ -377,6 +378,53 @@ public class Truco {
                 max = c.getValor().getValorEnvido();
         }
         return max;
+    }
+    
+    private int valorEnvidoConFlor(Jugador j) {
+        int combUno, combDos, combTres = 0;
+        
+        /*
+        3 cartas negras -> 20 de envido
+        2 cartas negras -> 1 negra + la que resta + 20
+        
+        1 carta negra   -> la dos que restan + 20 
+        
+        ninguna negra -> buscar la mejor combinacion de las 3
+        */
+        
+        if (cartaNegra(j.getCartas().get(0)) && cartaNegra(j.getCartas().get(1)) && cartaNegra(j.getCartas().get(2))) {
+            return 20;
+        }
+        
+        if (cartaNegra(j.getCartas().get(0)) && cartaNegra(j.getCartas().get(1)) ) {
+            return j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 10;
+        }
+        if (cartaNegra(j.getCartas().get(0)) && cartaNegra(j.getCartas().get(2)) ) {
+            return j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(1).getValor().getValorEnvido() + 10;
+        }
+        if (cartaNegra(j.getCartas().get(1)) && cartaNegra(j.getCartas().get(2)) ) {
+            return j.getCartas().get(1).getValor().getValorEnvido() + j.getCartas().get(0).getValor().getValorEnvido() + 10;
+        }
+        
+        if (cartaNegra(j.getCartas().get(0)) )
+            return j.getCartas().get(1).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 20;
+        if (cartaNegra(j.getCartas().get(1)) )
+            return j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 20;
+        if (cartaNegra(j.getCartas().get(2)) )
+            return j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(1).getValor().getValorEnvido() + 20;
+        
+        combUno  = j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(1).getValor().getValorEnvido() + 20;
+        combDos  = j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 20;
+        combTres = j.getCartas().get(1).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 20;
+        
+        if (combUno >= combDos && combUno >= combTres) {
+            return combUno;
+        } else if (combDos >= combUno && combDos >= combTres) {
+            return combDos;
+        } else {
+            return combTres;
+        }
+
     }
     
     /**
