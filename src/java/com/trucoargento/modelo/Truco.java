@@ -22,6 +22,8 @@ public class Truco {
     private Jugador jugadorUno;
     private Jugador jugadorDos;
 
+    private Jugador jugadorTurno;
+    
     private boolean estadoJuego;
 
     private static final Truco truco = new Truco();
@@ -61,6 +63,8 @@ public class Truco {
         jugadorUno = new Jugador();
         jugadorDos = new Jugador();
         
+        
+        jugadorTurno = jugadorUno;
         /*
         jugadorUno = new Jugador("Facu");
         jugadorDos = new Jugador("IA");
@@ -81,6 +85,12 @@ public class Truco {
         return jugadorDos;
     }
 
+    public Jugador getJugadorTurno() {
+        return jugadorTurno;
+    }
+
+    
+    
     // Setters
     public void setJugadorUno(Jugador jugadorUno) {
         this.jugadorUno = jugadorUno;
@@ -94,6 +104,11 @@ public class Truco {
     
    
     // Customs
+    
+    public void cambiarTurno() {
+        jugadorTurno = (jugadorTurno == jugadorUno ? jugadorDos : jugadorUno);
+    }
+    
     /**
      * A jugar!
      
@@ -183,10 +198,8 @@ public class Truco {
         int indice;
         for (int i = 0; i < ITruco.CARTASXJUGADOR; i++) {
             indice = r.nextInt(mazoCartas.size());
-            System.out.println("tamaño mazo : " + mazoCartas.size() + " indice : " + indice);
             carta = mazoCartas.get(indice);
             j.recibirCarta(carta);
-
             System.out.println("Se entrego " + carta + " a jugador : " + j);
             mazoCartas.remove(indice);
         }

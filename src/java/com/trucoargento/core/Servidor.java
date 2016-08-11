@@ -175,10 +175,12 @@ public class Servidor {
         // ya entregadas las cartas a los jugadores (servidor) se le 
         // envian dichas cartas a cada jugador (cliente) en formato json
 
+        System.out.println(t.getJugadorTurno() == t.getJugadorUno());
         JsonProvider provider = JsonProvider.provider();
         JsonObject mensajeJsonJ1 = provider.createObjectBuilder()
             .add("accion", "a_jugar")
             .add("href", "pantallaJuego.html")
+            .add("tuTurno", t.getJugadorTurno() == t.getJugadorUno())
             .add("cartas", Utileria.cartasToJson(t.getJugadorUno()))
             //.add("mensaje", "el juego comenzara!")
             .build();
@@ -186,6 +188,7 @@ public class Servidor {
         JsonObject mensajeJsonJ2 = provider.createObjectBuilder()
             .add("accion", "a_jugar")
             .add("href", "pantallaJuego.html")
+            .add("tuTurno", t.getJugadorTurno() == t.getJugadorDos())
             .add("cartas", Utileria.cartasToJson(t.getJugadorDos()))
             //.add("mensaje", "el juego comenzara!")
             .build();
