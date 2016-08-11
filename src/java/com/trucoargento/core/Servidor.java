@@ -64,7 +64,8 @@ public class Servidor {
     public void onMessage(String mensaje, Session s) {
         try (JsonReader reader = Json.createReader(new StringReader(mensaje))) {
             JsonObject mensajeJson = reader.readObject();
-
+            JsonProvider provider = JsonProvider.provider();
+            
             // mensaje de jugador uno
             if (t.getJugadorUno().getSesion() == s) {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
@@ -74,7 +75,12 @@ public class Servidor {
                 }
                 
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("jugador dos canta envido!");
+                    LOGGER.info("jugador uno canta envido!");
+                    JsonObject msgJ = provider.createObjectBuilder()
+                        .add("accion", "cantoEnvido")
+                        .add("mensaje", "jugador uno canto envido, ¿aceptas?")
+                        .build();
+                    mensajeAjugador(t.getJugadorDos(), msgJ.toString());
                 }
             }
 
@@ -92,7 +98,7 @@ public class Servidor {
                     
                     t.determinarEnvidoJugadorD(t.getJugadorDos());
                     //System.out.println("Tu envido es de : " + ret.get( ret.firstKey()) + " de : " + ret.firstEntry());
-                    JsonProvider provider = JsonProvider.provider();
+                    
                     JsonObject msgJ       = provider.createObjectBuilder()
                         .add("accion", "cantoEnvido")
                         .add("mensaje", "jugador dos canto envido, ¿aceptas?")
@@ -175,12 +181,15 @@ public class Servidor {
         // ya entregadas las cartas a los jugadores (servidor) se le 
         // envian dichas cartas a cada jugador (cliente) en formato json
 
-        System.out.println(t.getJugadorTurno() == t.getJugadorUno());
+        String nom = t.getJugadorTurno().getNombre();
+        
         JsonProvider provider = JsonProvider.provider();
         JsonObject mensajeJsonJ1 = provider.createObjectBuilder()
             .add("accion", "a_jugar")
             .add("href", "pantallaJuego.html")
             .add("tuTurno", t.getJugadorTurno() == t.getJugadorUno())
+            .add("nombreJugador", t.getJugadorUno().getNombre())
+            .add("nombreTurno", nom)
             .add("cartas", Utileria.cartasToJson(t.getJugadorUno()))
             //.add("mensaje", "el juego comenzara!")
             .build();
@@ -189,6 +198,8 @@ public class Servidor {
             .add("accion", "a_jugar")
             .add("href", "pantallaJuego.html")
             .add("tuTurno", t.getJugadorTurno() == t.getJugadorDos())
+                .add("nombreJugador", t.getJugadorDos().getNombre())
+            .add("nombreTurno", nom)
             .add("cartas", Utileria.cartasToJson(t.getJugadorDos()))
             //.add("mensaje", "el juego comenzara!")
             .build();
