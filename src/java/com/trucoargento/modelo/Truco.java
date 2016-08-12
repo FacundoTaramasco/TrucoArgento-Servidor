@@ -23,6 +23,7 @@ public class Truco {
     private Jugador jugadorDos;
 
     private Jugador jugadorTurno;
+    private Jugador jugadorMano; // jugador que es mano (empieza primero)
     
     private boolean estadoJuego;
 
@@ -65,6 +66,7 @@ public class Truco {
         
         
         jugadorTurno = jugadorUno;
+        jugadorMano = jugadorUno;
         /*
         jugadorUno = new Jugador("Facu");
         jugadorDos = new Jugador("IA");
@@ -89,6 +91,11 @@ public class Truco {
         return jugadorTurno;
     }
 
+    public Jugador getJugadorMano() {
+        return jugadorMano;
+    }
+
+    
     
     
     // Setters
@@ -105,6 +112,9 @@ public class Truco {
    
     // Customs
     
+    /**
+     * Metodo que alterna los turnos de los jugadores
+     */
     public void cambiarTurno() {
         jugadorTurno = (jugadorTurno == jugadorUno ? jugadorDos : jugadorUno);
     }
@@ -327,16 +337,17 @@ public class Truco {
         return (c.getValor() == NumeroCarta.DIEZ || c.getValor() == NumeroCarta.ONCE || c.getValor() == NumeroCarta.DOCE);
     }
         
-    public void determinarEnvidoJugadorD(Jugador j) {
-        int accEnvido = 0;
+    public int determinarEnvidoJugadorD(Jugador j) {
+        int accEnvido     = 0;
         int valorCartaUno = 0;
         int valorCartaDos = 0;
         List<Carta> l;
         // 3 cartas del mismo palo
         if (tieneFlor(j)) {
             System.out.println("Tenes flor capo, tomatelas");
-            System.out.println("La mejor combinacion para envido es : " + valorEnvidoConFlor(j));
-            return;
+            accEnvido = valorEnvidoConFlor(j);
+            System.out.println("La mejor combinacion para envido es : " + accEnvido);
+            return accEnvido;
         }
         l = dosCartasMismoPalo(j);
         // tiene dos cartas del mismo palo
@@ -353,6 +364,7 @@ public class Truco {
             accEnvido = valorEnvidoCartaMasAlta(j);
         }
         System.out.println("El envido vale : " + accEnvido);
+        return accEnvido;
     }
 
     /**
