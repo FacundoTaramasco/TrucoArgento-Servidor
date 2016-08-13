@@ -1,13 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.trucoargento.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trucoargento.modelo.Jugador;
-import com.trucoargento.modelo.Palos;
 import com.trucoargento.modelo.Truco;
 import java.io.IOException;
 import java.io.StringReader;
@@ -98,8 +91,6 @@ public class Servidor {
         }
     }
     
-
-            
     @OnClose
     public void close(Session s) {
         if (t.getJugadorUno().getSesion() == s) {
