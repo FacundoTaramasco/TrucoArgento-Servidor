@@ -128,7 +128,6 @@ public class Servidor {
         this.mensajeEsperaJugadorUno();
     }
     
-    
     /*
     cuando se conecta el jugador uno se le envia un mensaje indicando
     la espera por la conexion del jugador dos
