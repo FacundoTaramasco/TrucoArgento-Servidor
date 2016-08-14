@@ -70,8 +70,7 @@ public class Servidor {
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
                     this.atenderEnvidoAceptado();
-                }
-                
+                } 
             }
 
             // mensaje de jugador dos
