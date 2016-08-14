@@ -27,7 +27,7 @@ public class Servidor {
     
     private static final Logger LOGGER = Logger.getLogger(Servidor.class.getName());
     private final Truco t;
-  
+
     public Servidor() {
         //System.out.println("Iniciando servidor...");
         t = Truco.getInstance();
@@ -44,7 +44,7 @@ public class Servidor {
         // se conecto jugador dos
         } else if (t.getJugadorDos().getSesion() == null) {
             this.jugadorDosConectado(s);
-            this.jugadoresConectados();
+            //this.jugadoresConectados();
         } else {
             LOGGER.info("No se aceptan mas jugadores!");
         }
@@ -53,6 +53,7 @@ public class Servidor {
     @OnMessage
     public void onMessage(String mensaje, Session s) {
         try (JsonReader reader = Json.createReader(new StringReader(mensaje))) {
+            LOGGER.log(Level.INFO, "RECIBIENDO : {0}", mensaje);
             JsonObject mensajeJson = reader.readObject();
             
             // mensaje de jugador uno
@@ -70,6 +71,7 @@ public class Servidor {
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
                     this.atenderEnvidoAceptado();
                 }
+                
             }
 
             // mensaje de jugador dos
@@ -78,6 +80,8 @@ public class Servidor {
                     // seteando nombre del jugador
                     t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
                     LOGGER.log(Level.INFO, "jugador dos se llama : {0}", mensajeJson.getString("nombre"));
+                    
+                    this.jugadoresConectados();
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador dos canta envido!");
@@ -151,6 +155,7 @@ public class Servidor {
     private void darCartasJugadores() {
         t.darCartasJugador(t.getJugadorUno());
         t.darCartasJugador(t.getJugadorDos());
+        LOGGER.info("Cartas entregadas a los jugadores");
     }
     
     /*
@@ -162,6 +167,7 @@ public class Servidor {
         // envian dichas cartas a cada jugador (cliente) en formato json
         mensajeInicial(t.getJugadorUno());
         mensajeInicial(t.getJugadorDos());
+        
     }
     
     /**
@@ -264,10 +270,11 @@ public class Servidor {
      */
     private void mensajeAjugador(Jugador j, String msgJson) {
         try {
-           j.getSesion().getBasicRemote().sendText(msgJson); 
+           j.getSesion().getBasicRemote().sendText(msgJson);
+            LOGGER.log(Level.INFO, "ENVIANDO : {0}", msgJson);
         } catch(IOException e) {
             System.out.println(e.getMessage());
         }
     }
-   
+
 }

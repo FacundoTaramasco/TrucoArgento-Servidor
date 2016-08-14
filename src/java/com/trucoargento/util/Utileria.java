@@ -18,11 +18,8 @@ public class Utileria {
     
     public static String cartasToJson(Jugador j) {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            //List<Carta> l = new ArrayList<Carta>();
-                        
+        try {         
             String jsonInString = mapper.writeValueAsString( j.getCartas() );
-            System.out.println(jsonInString);
            return jsonInString;
         } catch (JsonProcessingException ex) {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
