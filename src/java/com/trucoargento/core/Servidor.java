@@ -66,14 +66,18 @@ public class Servidor {
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador uno canta envido");
                     t.cambiarTurno();
+                    this.avisoCambioTurno();
                     avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos());
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
                     this.atenderEnvidoAceptado();
                 }
-                
                 if (mensajeJson.getString("accion").equals("irseMazo")) {
                     LOGGER.info("jugador uno se fue al mazo");
+                    this.jugadoresDevuelvenCartas();
+                    this.darCartasJugadores();
+                    this.iniciarMano(t.getJugadorUno());
+                    this.iniciarMano(t.getJugadorDos());
                 }
             }
 
@@ -89,10 +93,18 @@ public class Servidor {
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("jugador dos canta envido");
                     t.cambiarTurno();
+                    this.avisoCambioTurno();
                     avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno());
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
                     this.atenderEnvidoAceptado();
+                }
+                if (mensajeJson.getString("accion").equals("irseMazo")) {
+                    LOGGER.info("jugador dos se fue al mazo");
+                    this.jugadoresDevuelvenCartas();
+                    this.darCartasJugadores();
+                    this.iniciarMano(t.getJugadorUno());
+                    this.iniciarMano(t.getJugadorDos());
                 }
             }
         }
@@ -153,22 +165,8 @@ public class Servidor {
         LOGGER.info("Entro jugador dos");
     }
     
-    /*
-    se le entregan las cartas a los jugadores (servidor/modelo)
-    */
-    private void darCartasJugadores() {
-        t.darCartasJugador(t.getJugadorUno());
-        t.darCartasJugador(t.getJugadorDos());
-        LOGGER.info("Cartas entregadas a los jugadores");
-    }
-    
-    private void jugadoresDevuelvenCartas() {
-        t.recibirCartasJugador( t.getJugadorUno() );
-        t.recibirCartasJugador( t.getJugadorDos() );
-        LOGGER.info("Todos los jugadores devuelven las cartas");
-    }
-    
-    
+
+       
     /*
     Metodo invocado cuando se encuentran conectados los dos jugadores
     */
@@ -200,6 +198,33 @@ public class Servidor {
         mensajeAjugador(j, mensajeJson.toString());
     }
     
+    private void iniciarMano(Jugador j) {
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject mensajeJson = provider.createObjectBuilder()
+            .add("accion", "iniciaMano")
+            .add("tuTurno", t.getJugadorTurno() == j)
+            .add("nombreTurno", t.getJugadorTurno().getNombre())
+            .add("cartas", Utileria.cartasToJson(j))
+            //.add("mensaje", "el juego comenzara!")
+            .build();
+        mensajeAjugador(j, mensajeJson.toString());
+    }
+   
+    /*
+    se le entregan las cartas a los jugadores (servidor/modelo)
+    */
+    private void darCartasJugadores() {
+        t.darCartasJugador(t.getJugadorUno());
+        t.darCartasJugador(t.getJugadorDos());
+        LOGGER.info("Cartas entregadas a los jugadores");
+    }
+    
+    private void jugadoresDevuelvenCartas() {
+        t.recibirCartasJugador( t.getJugadorUno() );
+        t.recibirCartasJugador( t.getJugadorDos() );
+        LOGGER.info("Todos los jugadores devuelven las cartas");
+    }
+    
     /**
      * Metodo que le envia un mensaje json al jugador indicando que el otro jugador
      * canto envido.
@@ -212,11 +237,21 @@ public class Servidor {
             .add("accion", "cantoEnvido")
             .add("mensaje", origen.getNombre() + " canto envido, ¿aceptas?")
             .add("tuTurno", t.getJugadorTurno() == destino) // irrelevante, debe ser siempre true esto
-            .add("nombreTurno", t.getJugadorTurno().getNombre()) // lo mismo... es destino.getNombre()
+            //.add("nombreTurno", t.getJugadorTurno().getNombre()) // lo mismo... es destino.getNombre()
             .build();
         mensajeAjugador(destino, msgJ.toString());
     }
     
+    private void avisoCambioTurno() {
+        LOGGER.info("cambio de turno...");
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject msgJ       = provider.createObjectBuilder()
+            .add("accion", "cambioTurno")
+            .add("nombreTurno", t.getJugadorTurno().getNombre())
+            .build();
+        mensajeAjugador(t.getJugadorUno(), msgJ.toString());
+        mensajeAjugador(t.getJugadorDos(), msgJ.toString());
+    }
     private void avisoRelogPagina(Jugador j) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
