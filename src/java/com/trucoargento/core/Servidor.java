@@ -99,14 +99,15 @@ public class Servidor {
         if (t.getJugadorUno().getSesion() == s) {
             LOGGER.info("Jugador uno salio");
             t.getJugadorUno().setSesion(null);
+            this.avisoRelogPagina(t.getJugadorDos());
         }
         if (t.getJugadorDos().getSesion() == s) {
             LOGGER.info("Jugados dos salio");
             t.getJugadorDos().setSesion(null);
+            this.avisoRelogPagina(t.getJugadorUno());
         }
         // todos los jugadores devuelven sus cartas
-        t.recibirCartasJugador( t.getJugadorUno() );
-        t.recibirCartasJugador( t.getJugadorDos() );
+        this.jugadoresDevuelvenCartas();
     }
 
     @OnError
@@ -157,6 +158,13 @@ public class Servidor {
         LOGGER.info("Cartas entregadas a los jugadores");
     }
     
+    private void jugadoresDevuelvenCartas() {
+        t.recibirCartasJugador( t.getJugadorUno() );
+        t.recibirCartasJugador( t.getJugadorDos() );
+        LOGGER.info("Todos los jugadores devuelven las cartas");
+    }
+    
+    
     /*
     Metodo invocado cuando se encuentran conectados los dos jugadores
     */
@@ -203,6 +211,14 @@ public class Servidor {
             .add("nombreTurno", t.getJugadorTurno().getNombre()) // lo mismo... es destino.getNombre()
             .build();
         mensajeAjugador(destino, msgJ.toString());
+    }
+    
+    private void avisoRelogPagina(Jugador j) {
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject msgJ       = provider.createObjectBuilder()
+            .add("accion", "relog")
+            .build();
+        mensajeAjugador(j, msgJ.toString());
     }
     
     /**
