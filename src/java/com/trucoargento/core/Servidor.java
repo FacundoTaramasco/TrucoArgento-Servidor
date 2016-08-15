@@ -81,6 +81,7 @@ public class Servidor {
                 }
             }
 
+            
             // mensaje de jugador dos
             if (t.getJugadorDos().getSesion() == s) {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
