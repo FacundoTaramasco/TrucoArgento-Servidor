@@ -59,7 +59,7 @@ public class Servidor {
             // mensaje de jugador uno
             if (t.getJugadorUno().getSesion() == s) {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
-                    // seteando nombre del jugador
+                    // seteanmsjGeneralesdo nombre del jugador
                     t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
                     LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
                 }
@@ -121,8 +121,9 @@ public class Servidor {
             LOGGER.info("Jugados dos salio");
             t.getJugadorDos().setSesion(null);
             this.avisoRelogPagina(t.getJugadorUno());
+            
         }
-        // todos los jugadores devuelven sus cartas
+        // OJO QUE SE LLAMA DOS VECES POR EL RELOG
         this.jugadoresDevuelvenCartas();
     }
 
@@ -222,9 +223,10 @@ public class Servidor {
     private void jugadoresDevuelvenCartas() {
         t.recibirCartasJugador( t.getJugadorUno() );
         t.recibirCartasJugador( t.getJugadorDos() );
-        LOGGER.info("Todos los jugadores devuelven las cartas");
+        LOGGER.info("Todos los jugadores devolvieron las cartas");
     }
     
+   
     /**
      * Metodo que le envia un mensaje json al jugador indicando que el otro jugador
      * canto envido.
@@ -253,13 +255,14 @@ public class Servidor {
         mensajeAjugador(t.getJugadorDos(), msgJ.toString());
     }
     private void avisoRelogPagina(Jugador j) {
+        if (j.getSesion() == null) return;
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
             .add("accion", "relog")
             .build();
         mensajeAjugador(j, msgJ.toString());
     }
-    
+ 
     /**
      * Metodo que le envia mensajes a los dos jugadores informando el resultado
      * del envido.
