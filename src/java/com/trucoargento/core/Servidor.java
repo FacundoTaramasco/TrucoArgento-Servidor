@@ -64,13 +64,17 @@ public class Servidor {
                     LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("jugador uno canta envido!");
+                    LOGGER.info("jugador uno canta envido");
                     t.cambiarTurno();
                     avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos());
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
                     this.atenderEnvidoAceptado();
-                } 
+                }
+                
+                if (mensajeJson.getString("accion").equals("irseMazo")) {
+                    LOGGER.info("jugador uno se fue al mazo");
+                }
             }
 
             // mensaje de jugador dos
@@ -83,7 +87,7 @@ public class Servidor {
                     this.jugadoresConectados();
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("jugador dos canta envido!");
+                    LOGGER.info("jugador dos canta envido");
                     t.cambiarTurno();
                     avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno());
                 }
