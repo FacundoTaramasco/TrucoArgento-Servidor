@@ -1,7 +1,6 @@
 package com.trucoargento.modelo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.websocket.Session;
 
@@ -13,18 +12,16 @@ import javax.websocket.Session;
 public class Jugador {
     
     private String nombre;
-    private List<Carta> cartas = new ArrayList<Carta>();
-    //private Carta[] cartas = new Carta[ITruco.CARTASXJUGADOR];
+    private List<Carta> cartas = new ArrayList<>();
     private int indiceCarta = 0;
     private Session sesion;
+    
     // Constructor
-
     public Jugador() {
         this("");
     }
 
     public Jugador(Session s) {
-        
     }
     
     public Jugador(String nombre) {
@@ -45,13 +42,12 @@ public class Jugador {
     public void recibirCarta( Carta cartaDelMazo) {
         if (indiceCarta == ITruco.CARTASXJUGADOR) return;
         cartas.add(cartaDelMazo);
-        //cartas[indiceCarta] = cartaDelMazo;
         indiceCarta++;
     }
 
     public List<Carta> entregarCargas() {
         List<Carta> tmp = this.getCartas();
-        this.cartas = new ArrayList<Carta>();
+        this.cartas = new ArrayList<>();
         indiceCarta = 0;
         return tmp;
     }

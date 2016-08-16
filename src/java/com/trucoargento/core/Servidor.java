@@ -29,7 +29,6 @@ public class Servidor {
     private final Truco t;
 
     public Servidor() {
-        //System.out.println("Iniciando servidor...");
         t = Truco.getInstance();
     }
 
@@ -44,7 +43,6 @@ public class Servidor {
         // se conecto jugador dos
         } else if (t.getJugadorDos().getSesion() == null) {
             this.jugadorDosConectado(s);
-            //this.jugadoresConectados();
         } else {
             LOGGER.info("No se aceptan mas jugadores!");
         }
@@ -59,12 +57,12 @@ public class Servidor {
             // mensaje de jugador uno
             if (t.getJugadorUno().getSesion() == s) {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
-                    // seteanmsjGeneralesdo nombre del jugador
+                    // seteando nombre del jugador
                     t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
-                    LOGGER.log(Level.INFO, "jugador uno se llama : {0}", mensajeJson.getString("nombre"));
+                    LOGGER.log(Level.INFO, "Jugador uno se llama : {0}", mensajeJson.getString("nombre"));
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("jugador uno canta envido");
+                    LOGGER.info("Jugador uno canta envido");
                     t.cambiarTurno();
                     this.avisoCambioTurno();
                     avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos());
@@ -73,11 +71,12 @@ public class Servidor {
                     this.atenderEnvidoAceptado();
                 }
                 if (mensajeJson.getString("accion").equals("irseMazo")) {
-                    LOGGER.info("jugador uno se fue al mazo");
+                    LOGGER.info("Jugador uno se fue al mazo");
                     this.jugadoresDevuelvenCartas();
                     this.darCartasJugadores();
-                    this.iniciarMano(t.getJugadorUno());
-                    this.iniciarMano(t.getJugadorDos());
+                    t.cambiarMano();
+                    this.avisarInicioMano(t.getJugadorUno());
+                    this.avisarInicioMano(t.getJugadorDos());
                 }
             }
 
@@ -87,12 +86,12 @@ public class Servidor {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
                     // seteando nombre del jugador
                     t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
-                    LOGGER.log(Level.INFO, "jugador dos se llama : {0}", mensajeJson.getString("nombre"));
-                    
-                    this.jugadoresConectados();
+                    LOGGER.log(Level.INFO, "Jugador dos se llama : {0}", mensajeJson.getString("nombre"));
+                    // se inicia la partida
+                    this.comenzarPartida();
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("jugador dos canta envido");
+                    LOGGER.info("Jugador dos canta envido");
                     t.cambiarTurno();
                     this.avisoCambioTurno();
                     avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno());
@@ -101,11 +100,12 @@ public class Servidor {
                     this.atenderEnvidoAceptado();
                 }
                 if (mensajeJson.getString("accion").equals("irseMazo")) {
-                    LOGGER.info("jugador dos se fue al mazo");
+                    LOGGER.info("Jugador dos se fue al mazo");
                     this.jugadoresDevuelvenCartas();
                     this.darCartasJugadores();
-                    this.iniciarMano(t.getJugadorUno());
-                    this.iniciarMano(t.getJugadorDos());
+                    t.cambiarMano();
+                    this.avisarInicioMano(t.getJugadorUno());
+                    this.avisarInicioMano(t.getJugadorDos());
                 }
             }
         }
@@ -167,18 +167,17 @@ public class Servidor {
         LOGGER.info("Entro jugador dos");
     }
     
-
-       
     /*
-    Metodo invocado cuando se encuentran conectados los dos jugadores
+    Metodo invocado cuando se encuentran conectados los dos jugadores y se da 
+    inicio a la partida
     */
-    private void jugadoresConectados() {
+    private void comenzarPartida() {
+        t.turnoPrimeraMano();
         this.darCartasJugadores();
         // ya entregadas las cartas a los jugadores (servidor/modelo) se le 
         // envian dichas cartas a cada jugador (cliente) en formato json
         mensajeInicial(t.getJugadorUno());
         mensajeInicial(t.getJugadorDos());
-        
     }
     
     /**
@@ -189,31 +188,32 @@ public class Servidor {
     private void mensajeInicial(Jugador j) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject mensajeJson = provider.createObjectBuilder()
-            .add("accion", "a_jugar")
-            .add("href", "pantallaJuego.html")
-            .add("tuTurno", t.getJugadorTurno() == j)
+            .add("accion",        "a_jugar")
+            .add("href",          "pantallaJuego.html")
+            .add("tuTurno",       t.getJugadorTurno() == j)
             .add("nombreJugador", j.getNombre())
-            .add("nombreTurno", t.getJugadorTurno().getNombre())
-            .add("cartas", Utileria.cartasToJson(j))
-            //.add("mensaje", "el juego comenzara!")
+            .add("nombreTurno",   t.getJugadorTurno().getNombre())
+            .add("cartas",        Utileria.cartasToJson(j))
             .build();
         mensajeAjugador(j, mensajeJson.toString());
     }
     
-    private void iniciarMano(Jugador j) {
+    /*
+    Metodo que le avisa al jugador el comienzo de la mano
+    */
+    private void avisarInicioMano(Jugador j) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject mensajeJson = provider.createObjectBuilder()
-            .add("accion", "iniciaMano")
-            .add("tuTurno", t.getJugadorTurno() == j)
+            .add("accion",      "iniciaMano")
+            .add("tuTurno",     t.getJugadorTurno() == j)
             .add("nombreTurno", t.getJugadorTurno().getNombre())
-            .add("cartas", Utileria.cartasToJson(j))
-            //.add("mensaje", "el juego comenzara!")
+            .add("cartas",      Utileria.cartasToJson(j))
             .build();
         mensajeAjugador(j, mensajeJson.toString());
     }
    
     /*
-    se le entregan las cartas a los jugadores (servidor/modelo)
+    Se le entregan las cartas a los jugadores (servidor/modelo)
     */
     private void darCartasJugadores() {
         t.darCartasJugador(t.getJugadorUno());
@@ -221,12 +221,14 @@ public class Servidor {
         LOGGER.info("Cartas entregadas a los jugadores");
     }
     
+    /*
+    Todos los jugadores devuelven las cartas y se ponen en el mazo
+    */
     private void jugadoresDevuelvenCartas() {
         t.recibirCartasJugador( t.getJugadorUno() );
         t.recibirCartasJugador( t.getJugadorDos() );
         LOGGER.info("Todos los jugadores devolvieron las cartas");
     }
-    
    
     /**
      * Metodo que le envia un mensaje json al jugador indicando que el otro jugador
@@ -237,10 +239,8 @@ public class Servidor {
     private void avisoJugadorCantoEnvido(Jugador origen, Jugador destino) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
-            .add("accion", "cantoEnvido")
+            .add("accion",  "cantoEnvido")
             .add("mensaje", origen.getNombre() + " canto envido, ¿aceptas?")
-            .add("tuTurno", t.getJugadorTurno() == destino) // irrelevante, debe ser siempre true esto
-            //.add("nombreTurno", t.getJugadorTurno().getNombre()) // lo mismo... es destino.getNombre()
             .build();
         mensajeAjugador(destino, msgJ.toString());
     }
@@ -249,7 +249,7 @@ public class Servidor {
         LOGGER.info("cambio de turno...");
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
-            .add("accion", "cambioTurno")
+            .add("accion",      "cambioTurno")
             .add("nombreTurno", t.getJugadorTurno().getNombre())
             .build();
         mensajeAjugador(t.getJugadorUno(), msgJ.toString());

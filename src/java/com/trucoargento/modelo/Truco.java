@@ -16,19 +16,17 @@ import java.util.TreeMap;
  */
 public class Truco {
     
-    private List<Carta> mazoCartas                    = new ArrayList<Carta>();
-    private final Map<Carta, Integer> jerarquiaCartas = new HashMap<Carta, Integer>();
+    private List<Carta> mazoCartas                    = new ArrayList<>();
+    private final Map<Carta, Integer> jerarquiaCartas = new HashMap<>();
 
     private Jugador jugadorUno;
     private Jugador jugadorDos;
 
     private Jugador jugadorTurno;
-    private Jugador jugadorMano; // jugador que es mano (empieza primero)
-    
-    private boolean estadoJuego;
+    private Jugador jugadorMano;
 
+    // Singleton
     private static final Truco truco = new Truco();
-    
     public static Truco getInstance() { return truco; }
     
     // Constructor
@@ -64,18 +62,7 @@ public class Truco {
         jugadorUno = new Jugador();
         jugadorDos = new Jugador();
         
-        
-        jugadorTurno = jugadorUno;
-        jugadorMano = jugadorUno;
-        /*
-        jugadorUno = new Jugador("Facu");
-        jugadorDos = new Jugador("IA");
-
-        System.out.println("Jugadores : ");
-        System.out.println(jugadorUno);
-        System.out.println(jugadorDos);
-        System.out.println("*******************************************************\n");
-        */
+        this.turnoPrimeraMano();
     }
     
     // Getters
@@ -94,9 +81,6 @@ public class Truco {
     public Jugador getJugadorMano() {
         return jugadorMano;
     }
-
-    
-    
     
     // Setters
     public void setJugadorUno(Jugador jugadorUno) {
@@ -106,37 +90,33 @@ public class Truco {
     public void setJugadorDos(Jugador jugadorDos) {
         this.jugadorDos = jugadorDos;
     }
-    
-    
-    
    
     // Customs
     
     /**
-     * Metodo que alterna los turnos de los jugadores
+     * Metodo que alterna los turnos de los jugadores.
      */
     public void cambiarTurno() {
         jugadorTurno = (jugadorTurno == jugadorUno ? jugadorDos : jugadorUno);
     }
     
     /**
-     * A jugar!
-     
-    public void jugar() {
-        
-        estadoJuego = true;
-
-        System.out.println("Entregando cartas a los jugadores...");
-        this.darCartasJugador(jugadorUno);
-        this.darCartasJugador(jugadorDos);
-
-        System.out.println("Recibiendo cartas de todos los jugadores...");
-
-        this.recibirCartasJugadores();
-        this.mostrarMazoCustom();
-
+     * Metodo que cambia el jugador que es mano.
+     */
+    public void cambiarMano() {
+        jugadorMano  = (jugadorMano == jugadorUno ? jugadorDos : jugadorUno);
+        // empieza el jugador que es mano
+        jugadorTurno = jugadorMano;
     }
-    */
+    
+    /**
+     * Metodo que establece que jugador es mano primero.
+     */
+    public void turnoPrimeraMano() {
+        Random r     = new Random();
+        jugadorMano  = (r.nextBoolean() ? jugadorUno : jugadorDos);
+        jugadorTurno = jugadorMano;        
+    }
     
     /**
      * Metodo que genera el mazo de cartas
@@ -153,7 +133,6 @@ public class Truco {
      * Metodo que establece el orden jerarquico del mazo
      */
     private void establecerJerarquiaCartas() {
-
         jerarquiaCartas.put( mazoCartas.get(30), 1 ); // 1 espada
         jerarquiaCartas.put( mazoCartas.get(20), 2 ); // 1 basto
         jerarquiaCartas.put( mazoCartas.get(36), 3 ); // 7 espada
@@ -238,7 +217,7 @@ public class Truco {
         if (tieneFlor(j)) {
             System.out.println("Tenes flor capo, tomatelas");
             accEnvido = valorEnvidoConFlor(j);
-            System.out.println("La mejor combinacion para envido es : " + accEnvido);
+            System.out.println("La mejor combinacion para envido con flor es : " + accEnvido);
             return accEnvido;
         }
         l = dosCartasMismoPalo(j);
@@ -341,18 +320,16 @@ public class Truco {
         } else {
             return combTres;
         }
-
     }
     
     /**
      * Metodo que recibe todas las cartas de j y las agrega al mazo nuevamente
+     * @param j
      */
     public void recibirCartasJugador(Jugador j) {
         if (j.getCartas() != null) {
-            System.out.println(j.getNombre() + " esta entregando sus cartas");
             mazoCartas.addAll( j.entregarCargas() );
         }
-        //mazoCartas.addAll(Arrays.asList( jugadorDos.entregarCargas() ));
     }
 
     private void mostrarMazoCustom() {
