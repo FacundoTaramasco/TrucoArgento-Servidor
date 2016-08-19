@@ -25,6 +25,11 @@ public class Truco {
     private Jugador jugadorTurno;
     private Jugador jugadorMano;
 
+    private int puntosJugadorUno;
+    private int puntosJugadorDos;
+    
+    private int puntosEnvido;
+    
     // Singleton
     private static final Truco truco = new Truco();
     public static Truco getInstance() { return truco; }
@@ -178,20 +183,32 @@ public class Truco {
     }
 
     /**
-     * Metodo que le entrega ITruco.CARTASXJUGADOR cartas random del mazo al jugador especificado.
+     * Metodo que le entrega 3 cartas random del mazo al jugador especificado.
      * @param j Jugador que recibe las cartas.
      */
     public void darCartasJugador(Jugador j) {
         Random r = new Random();
         Carta carta;
         int indice;
-        for (int i = 0; i < ITruco.CARTASXJUGADOR; i++) {
+        for (int i = 0; i < 3; i++) {
             indice = r.nextInt(mazoCartas.size());
             carta = mazoCartas.get(indice);
             j.recibirCarta(carta);
             //System.out.println("Se entrego " + carta + " a jugador : " + j);
             mazoCartas.remove(indice);
         }
+    }
+    
+    
+    public void jugadorCantaEnvido(Jugador j) {
+        
+    }    
+    public void jugadorAceptaEnvido() {
+        
+    }
+    
+    public void jugadorRechazaEnvido() {
+        
     }
     
     private boolean tieneFlor(Jugador j) {
