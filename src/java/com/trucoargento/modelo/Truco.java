@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import javax.json.JsonObject;
+import javax.json.spi.JsonProvider;
 
 /**
  *
@@ -29,6 +31,8 @@ public class Truco {
     private int puntosJugadorDos;
     
     private int puntosEnvido;
+    
+    private Envido envido;
     
     // Singleton
     private static final Truco truco = new Truco();
@@ -67,6 +71,8 @@ public class Truco {
         jugadorUno = new Jugador();
         jugadorDos = new Jugador();
         
+        envido = new Envido();
+        
         this.turnoPrimeraMano();
     }
     
@@ -86,6 +92,11 @@ public class Truco {
     public Jugador getJugadorMano() {
         return jugadorMano;
     }
+
+    public Envido getEnvido() {
+        return envido;
+    }
+    
     
     // Setters
     public void setJugadorUno(Jugador jugadorUno) {
@@ -199,6 +210,15 @@ public class Truco {
         }
     }
     
+    /**
+     * Metodo que recibe todas las cartas de j y las agrega al mazo nuevamente
+     * @param j
+     */
+    public void recibirCartasJugador(Jugador j) {
+        if (j.getCartas() != null) {
+            mazoCartas.addAll( j.entregarCargas() );
+        }
+    }
     
     public void jugadorCantaEnvido(Jugador j) {
         
@@ -308,7 +328,6 @@ public class Truco {
         if (cartaNegra(j.getCartas().get(0)) && cartaNegra(j.getCartas().get(1)) && cartaNegra(j.getCartas().get(2))) {
             return 20;
         }
-        
         if (cartaNegra(j.getCartas().get(0)) && cartaNegra(j.getCartas().get(1)) ) {
             return j.getCartas().get(0).getValor().getValorEnvido() + j.getCartas().get(2).getValor().getValorEnvido() + 10;
         }
@@ -340,15 +359,72 @@ public class Truco {
     }
     
     /**
-     * Metodo que recibe todas las cartas de j y las agrega al mazo nuevamente
-     * @param j
+     * Metodo que retorna el resultado del envido en json de ambos jugadores.
      */
-    public void recibirCartasJugador(Jugador j) {
-        if (j.getCartas() != null) {
-            mazoCartas.addAll( j.entregarCargas() );
-        }
-    }
+    public JsonObject resultadoJsonEnvido() {
+        JsonObject resultadoJugadorUno;
+        JsonObject resultadoJugadorDos;
+        
+        int envidoJugadorUno = this.determinarEnvidoJugadorD( this.getJugadorUno() );
+        int envidoJugadorDos = this.determinarEnvidoJugadorD( this.getJugadorDos() );
 
+        if (envidoJugadorUno > envidoJugadorDos) {
+            resultadoJugadorUno = jsonResultadoEnvidoJugador(true, this.getJugadorDos(), envidoJugadorUno, envidoJugadorDos);
+            resultadoJugadorDos = jsonResultadoEnvidoJugador(false, this.getJugadorUno(), envidoJugadorDos, envidoJugadorUno);
+        } else if(envidoJugadorDos > envidoJugadorUno) {
+            resultadoJugadorUno = jsonResultadoEnvidoJugador(false, this.getJugadorDos(), envidoJugadorUno, envidoJugadorDos);
+            resultadoJugadorDos = jsonResultadoEnvidoJugador(true, this.getJugadorUno(), envidoJugadorDos, envidoJugadorUno);
+        } else { // envidos iguales
+            if (this.getJugadorMano() == this.getJugadorUno()) { // es mano jugador uno
+                // gano jugador uno
+                resultadoJugadorUno = jsonResultadoEnvidoJugador(true, this.getJugadorDos(), envidoJugadorUno, envidoJugadorDos);
+                resultadoJugadorDos = jsonResultadoEnvidoJugador(false, this.getJugadorUno(), envidoJugadorDos, envidoJugadorUno);                 
+            } else {
+                // gano jugador dos
+                resultadoJugadorUno = jsonResultadoEnvidoJugador(false, this.getJugadorDos(), envidoJugadorUno, envidoJugadorDos);
+                resultadoJugadorDos = jsonResultadoEnvidoJugador(true, this.getJugadorUno(), envidoJugadorDos, envidoJugadorUno);
+            }
+        }
+        
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject json       = provider.createObjectBuilder()
+                .add("jugadorUno", resultadoJugadorUno)
+                .add("jugadorDos", resultadoJugadorDos)
+                .build();
+
+        return json;
+    }
+    
+    /**
+     * Metodo que retorna un json con informacion del resultado del envido.
+     * @param resultado
+     * @param elOtroJugador
+     * @param envidoVos
+     * @param envidoEl
+     * @return 
+     */
+    private JsonObject jsonResultadoEnvidoJugador(boolean resultado, Jugador elOtroJugador, int envidoVos, int envidoEl) {
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject json       = provider.createObjectBuilder()
+            .add("accion", "determinarEnvido")
+            .add("resultado", msgGenericoEnvido( (resultado ? "Ganaste" : "Perdiste"), elOtroJugador, envidoVos, envidoEl) )
+            .build();
+        return json;
+    }
+    
+    /**
+     * Metodo de utileria que formatea y retorna un String que representa un
+     * mensaje para un jugador.
+     * @param resultado
+     * @param elOtro
+     * @param envidoJ1
+     * @param envidoJ2
+     * @return 
+     */
+    private String msgGenericoEnvido(String resultado, Jugador elOtro, int envidoJ1, int envidoJ2) {
+        return resultado + " envido con: " + envidoJ1 + ", " + elOtro.getNombre() + " tenia: " + envidoJ2;
+    }
+    
     private void mostrarMazoCustom() {
         for (Carta c : mazoCartas) {
             System.out.println(c);

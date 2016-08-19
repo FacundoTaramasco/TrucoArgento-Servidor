@@ -22,10 +22,10 @@ Envido, envido, real envido, falta envido	*               7
  */
 public class Envido {
     
-    private LinkedList<EnumEnvido> l = new LinkedList();
+    private LinkedList<EnumEnvido> l;
     
     public Envido() {
-        
+        l = new LinkedList();
     }
     
     public void agregarEnvido(EnumEnvido ie) throws ExcepcionEnvido {
@@ -44,6 +44,10 @@ public class Envido {
         if (l.contains(ie))
             throw new ExcepcionEnvido(ie.toString() + " ya fue cantado.");
         l.add(ie);
+    }
+    
+    public void reiniciarEnvido() {
+        l.clear();
     }
     
     public int calcularPuntajeAceptado() {

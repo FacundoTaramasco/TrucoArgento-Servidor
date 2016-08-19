@@ -1,5 +1,7 @@
 package com.trucoargento.core;
 
+import com.trucoargento.excepciones.ExcepcionEnvido;
+import com.trucoargento.modelo.EnumEnvido;
 import com.trucoargento.modelo.Jugador;
 import com.trucoargento.modelo.Truco;
 import java.io.IOException;
@@ -63,12 +65,36 @@ public class Servidor {
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("Jugador uno canta envido");
-                    t.cambiarTurno();
-                    this.avisoCambioTurno();
-                    avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos());
+                    System.out.println("tipo envido : " + mensajeJson.getString("tipo"));
+                    EnumEnvido env = null;
+                    int intEnv     = Integer.parseInt(mensajeJson.getString("tipo"));
+                    
+                    switch(intEnv) {
+                        case 1:
+                            env = EnumEnvido.ENVIDO;
+                            break;
+                        case 2:
+                            env = EnumEnvido.ENVIDO_ENVIDO;
+                            break;
+                        case 3:
+                            env = EnumEnvido.REAL_ENVIDO;
+                            break;
+                        case 4:
+                            env = EnumEnvido.FALTA_ENVIDO;
+                    }
+                    
+                    try {
+                         t.getEnvido().agregarEnvido(env);
+                        t.cambiarTurno();
+                        this.avisoCambioTurno();
+                        avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos(), intEnv, env);
+                    } catch(ExcepcionEnvido ee) {
+                         this.mensajeAjugador(t.getJugadorUno(), ee.getMessage());
+                    }
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
-                    this.atenderEnvidoAceptado();
+                    this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
+                    this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
                 }
                 if (mensajeJson.getString("accion").equals("irseMazo")) {
                     LOGGER.info("Jugador uno se fue al mazo");
@@ -80,7 +106,6 @@ public class Servidor {
                 }
             }
 
-            
             // mensaje de jugador dos
             if (t.getJugadorDos().getSesion() == s) {
                 if (mensajeJson.getString("accion").equals("entraJuego")) {
@@ -92,12 +117,36 @@ public class Servidor {
                 }
                 if (mensajeJson.getString("accion").equals("cantoEnvido")) {
                     LOGGER.info("Jugador dos canta envido");
-                    t.cambiarTurno();
-                    this.avisoCambioTurno();
-                    avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno());
+                    System.out.println("tipo envido : " + mensajeJson.getString("tipo"));
+                    EnumEnvido env = null;
+                    int intEnv     = Integer.parseInt(mensajeJson.getString("tipo"));
+                    
+                    switch(intEnv) {
+                        case 1:
+                            env = EnumEnvido.ENVIDO;
+                            break;
+                        case 2:
+                            env = EnumEnvido.ENVIDO_ENVIDO;
+                            break;
+                        case 3:
+                            env = EnumEnvido.REAL_ENVIDO;
+                            break;
+                        case 4:
+                            env = EnumEnvido.FALTA_ENVIDO;
+                    }
+                    
+                    try {
+                         t.getEnvido().agregarEnvido(env);
+                        t.cambiarTurno();
+                        this.avisoCambioTurno();
+                        avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno(), intEnv, env);
+                    } catch(ExcepcionEnvido ee) {
+                         this.mensajeAjugador(t.getJugadorDos(), ee.getMessage());
+                    }
                 }
                 if (mensajeJson.getString("accion").equals("envidoAceptado")) {
-                    this.atenderEnvidoAceptado();
+                    this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
+                    this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
                 }
                 if (mensajeJson.getString("accion").equals("irseMazo")) {
                     LOGGER.info("Jugador dos se fue al mazo");
@@ -236,11 +285,12 @@ public class Servidor {
      * @param origen
      * @param destino 
      */
-    private void avisoJugadorCantoEnvido(Jugador origen, Jugador destino) {
+    private void avisoJugadorCantoEnvido(Jugador origen, Jugador destino, int intEnv, EnumEnvido env) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
             .add("accion",  "cantoEnvido")
-            .add("mensaje", origen.getNombre() + " canto envido, ¿aceptas?")
+            .add("tipoEnvido", intEnv)
+            .add("mensaje", origen.getNombre() + " canto "+ env.toString().toLowerCase()  +", ¿aceptas?")
             .build();
         mensajeAjugador(destino, msgJ.toString());
     }
@@ -264,63 +314,7 @@ public class Servidor {
         mensajeAjugador(j, msgJ.toString());
     }
  
-    /**
-     * Metodo que le envia mensajes a los dos jugadores informando el resultado
-     * del envido.
-     */
-    private void atenderEnvidoAceptado() {
-        int envidoJugadorUno = t.determinarEnvidoJugadorD( t.getJugadorUno() );
-        int envidoJugadorDos = t.determinarEnvidoJugadorD( t.getJugadorDos() );
 
-        if (envidoJugadorUno > envidoJugadorDos) {
-            mensajeAjugador(t.getJugadorUno(), jsonResultadoEnvidoJugador(true, t.getJugadorDos(), envidoJugadorUno, envidoJugadorDos).toString() );
-            mensajeAjugador(t.getJugadorDos(), jsonResultadoEnvidoJugador(false, t.getJugadorUno(), envidoJugadorDos, envidoJugadorUno).toString() );
-        } else if(envidoJugadorDos > envidoJugadorUno) {
-            mensajeAjugador(t.getJugadorUno(), jsonResultadoEnvidoJugador(false, t.getJugadorDos(), envidoJugadorUno, envidoJugadorDos).toString() );
-            mensajeAjugador(t.getJugadorDos(), jsonResultadoEnvidoJugador(true, t.getJugadorUno(), envidoJugadorDos, envidoJugadorUno).toString() );
-        } else { // envidos iguales
-            if (t.getJugadorMano() == t.getJugadorUno()) { // es mano jugador uno
-                // gano jugador uno
-                mensajeAjugador(t.getJugadorUno(), jsonResultadoEnvidoJugador(true, t.getJugadorDos(), envidoJugadorUno, envidoJugadorDos).toString() );
-                mensajeAjugador(t.getJugadorDos(), jsonResultadoEnvidoJugador(false, t.getJugadorUno(), envidoJugadorDos, envidoJugadorUno).toString() );                 
-            } else {
-                // gano jugador dos
-                mensajeAjugador(t.getJugadorUno(), jsonResultadoEnvidoJugador(false, t.getJugadorDos(), envidoJugadorUno, envidoJugadorDos).toString() );
-                mensajeAjugador(t.getJugadorDos(), jsonResultadoEnvidoJugador(true, t.getJugadorUno(), envidoJugadorDos, envidoJugadorUno).toString() );
-            }
-        }
-    }
-    
-    /**
-     * Metodo que retorna un json con informacion del resultado del envido.
-     * @param resultado
-     * @param elOtroJugador
-     * @param envidoVos
-     * @param envidoEl
-     * @return 
-     */
-    private JsonObject jsonResultadoEnvidoJugador(boolean resultado, Jugador elOtroJugador, int envidoVos, int envidoEl) {
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject json       = provider.createObjectBuilder()
-            .add("accion", "determinarEnvido")
-            .add("resultado", msgGenericoEnvido( (resultado ? "Ganaste" : "Perdiste"), elOtroJugador, envidoVos, envidoEl) )
-            .build();
-        return json;
-    }
-    
-    /**
-     * Metodo de utileria que formatea y retorna un String que representa un
-     * mensaje para un jugador.
-     * @param resultado
-     * @param elOtro
-     * @param envidoJ1
-     * @param envidoJ2
-     * @return 
-     */
-    private String msgGenericoEnvido(String resultado, Jugador elOtro, int envidoJ1, int envidoJ2) {
-        return resultado + " envido con: " + envidoJ1 + ", " + elOtro.getNombre() + " tenia: " + envidoJ2;
-    }
-    
     /**
      * Metodo que le envia un mensaje en formato json a un jugador
      * @param j
