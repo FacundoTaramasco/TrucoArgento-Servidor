@@ -1,5 +1,6 @@
 package com.trucoargento.modelo;
 
+import com.trucoargento.excepciones.ExcepcionEnvido;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
 
 /**
@@ -92,11 +94,6 @@ public class Truco {
     public Jugador getJugadorMano() {
         return jugadorMano;
     }
-
-    public Envido getEnvido() {
-        return envido;
-    }
-    
     
     // Setters
     public void setJugadorUno(Jugador jugadorUno) {
@@ -220,10 +217,17 @@ public class Truco {
         }
     }
     
-    public void jugadorCantaEnvido(Jugador j) {
-        
-    }    
+    public void reiniciarEnvido() {
+        envido.reiniciarEnvido();
+    }
+    
+    public void jugadorCantaEnvido(EnumEnvido ee) throws ExcepcionEnvido {
+        envido.agregarEnvido(ee);
+    }
+    
     public void jugadorAceptaEnvido() {
+        
+        //JsonValue get = resultadoJsonEnvido().get("jugadorUno");
         
     }
     
@@ -245,14 +249,14 @@ public class Truco {
         return (c.getValor() == NumeroCarta.DIEZ || c.getValor() == NumeroCarta.ONCE || c.getValor() == NumeroCarta.DOCE);
     }
         
-    public int determinarEnvidoJugadorD(Jugador j) {
+    private int determinarEnvidoJugador(Jugador j) {
         int accEnvido     = 0;
         int valorCartaUno = 0;
         int valorCartaDos = 0;
         List<Carta> l;
         // 3 cartas del mismo palo
         if (tieneFlor(j)) {
-            System.out.println("Tenes flor capo, tomatelas");
+            System.out.println("Tenes flor capo, tomatela");
             accEnvido = valorEnvidoConFlor(j);
             System.out.println("La mejor combinacion para envido con flor es : " + accEnvido);
             return accEnvido;
@@ -360,13 +364,16 @@ public class Truco {
     
     /**
      * Metodo que retorna el resultado del envido en json de ambos jugadores.
+     * Ej.
+     * {accion : determinarEnvido,
+     * resultado : ganaste/perdiste envido con: X, el otro jugador tenia: Y}
      */
     public JsonObject resultadoJsonEnvido() {
         JsonObject resultadoJugadorUno;
         JsonObject resultadoJugadorDos;
         
-        int envidoJugadorUno = this.determinarEnvidoJugadorD( this.getJugadorUno() );
-        int envidoJugadorDos = this.determinarEnvidoJugadorD( this.getJugadorDos() );
+        int envidoJugadorUno = this.determinarEnvidoJugador( this.getJugadorUno() );
+        int envidoJugadorDos = this.determinarEnvidoJugador( this.getJugadorDos() );
 
         if (envidoJugadorUno > envidoJugadorDos) {
             resultadoJugadorUno = jsonResultadoEnvidoJugador(true, this.getJugadorDos(), envidoJugadorUno, envidoJugadorDos);
@@ -408,6 +415,7 @@ public class Truco {
         JsonObject json       = provider.createObjectBuilder()
             .add("accion", "determinarEnvido")
             .add("resultado", msgGenericoEnvido( (resultado ? "Ganaste" : "Perdiste"), elOtroJugador, envidoVos, envidoEl) )
+            .add("gano", resultado)
             .build();
         return json;
     }

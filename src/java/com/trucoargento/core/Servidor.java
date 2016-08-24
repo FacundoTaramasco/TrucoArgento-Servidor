@@ -58,103 +58,64 @@ public class Servidor {
             
             // mensaje de jugador uno
             if (t.getJugadorUno().getSesion() == s) {
-                if (mensajeJson.getString("accion").equals("entraJuego")) {
-                    // seteando nombre del jugador
-                    t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
-                    LOGGER.log(Level.INFO, "Jugador uno se llama : {0}", mensajeJson.getString("nombre"));
-                }
-                if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("Jugador uno canta envido");
-                    System.out.println("tipo envido : " + mensajeJson.getString("tipo"));
-                    EnumEnvido env = null;
-                    int intEnv     = Integer.parseInt(mensajeJson.getString("tipo"));
-                    
-                    switch(intEnv) {
-                        case 1:
-                            env = EnumEnvido.ENVIDO;
-                            break;
-                        case 2:
-                            env = EnumEnvido.ENVIDO_ENVIDO;
-                            break;
-                        case 3:
-                            env = EnumEnvido.REAL_ENVIDO;
-                            break;
-                        case 4:
-                            env = EnumEnvido.FALTA_ENVIDO;
-                    }
-                    
-                    try {
-                         t.getEnvido().agregarEnvido(env);
-                        t.cambiarTurno();
-                        this.avisoCambioTurno();
-                        avisoJugadorCantoEnvido(t.getJugadorUno(), t.getJugadorDos(), intEnv, env);
-                    } catch(ExcepcionEnvido ee) {
-                         this.mensajeAjugador(t.getJugadorUno(), ee.getMessage());
-                    }
-                }
-                if (mensajeJson.getString("accion").equals("envidoAceptado")) {
-                    this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
-                    this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
-                }
-                if (mensajeJson.getString("accion").equals("irseMazo")) {
-                    LOGGER.info("Jugador uno se fue al mazo");
-                    this.jugadoresDevuelvenCartas();
-                    this.darCartasJugadores();
-                    t.cambiarMano();
-                    this.avisarInicioMano(t.getJugadorUno());
-                    this.avisarInicioMano(t.getJugadorDos());
+                switch (mensajeJson.getString("accion")) {
+                    case "entraJuego":
+                        // seteando nombre del jugador
+                        t.getJugadorUno().setNombre( mensajeJson.getString("nombre") );
+                        LOGGER.log(Level.INFO, "Jugador uno se llama : {0}", t.getJugadorUno().getNombre());
+                        break;
+                    case "cantoEnvido":
+                        if (t.getJugadorUno() != t.getJugadorTurno()) {
+                            // NO ES EL TURNO DE JUGADOR UNO!
+                        }
+                        int intEnv = Integer.parseInt(mensajeJson.getString("tipo"));
+                        this.atenderCantoEnvido(t.getJugadorUno(), t.getJugadorDos(), intEnv);
+                        break;
+                    case "envidoAceptado":
+                        this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
+                        this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
+                        break;
+                    case "irseMazo":
+                        LOGGER.info("Jugador uno se fue al mazo");
+                        this.jugadoresDevuelvenCartas();
+                        this.darCartasJugadores();
+                        t.cambiarMano();
+                        this.avisarInicioMano(t.getJugadorUno());
+                        this.avisarInicioMano(t.getJugadorDos());
+                        break;
+                    default:
+                        break;
                 }
             }
 
             // mensaje de jugador dos
             if (t.getJugadorDos().getSesion() == s) {
-                if (mensajeJson.getString("accion").equals("entraJuego")) {
-                    // seteando nombre del jugador
-                    t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
-                    LOGGER.log(Level.INFO, "Jugador dos se llama : {0}", mensajeJson.getString("nombre"));
-                    // se inicia la partida
-                    this.comenzarPartida();
-                }
-                if (mensajeJson.getString("accion").equals("cantoEnvido")) {
-                    LOGGER.info("Jugador dos canta envido");
-                    System.out.println("tipo envido : " + mensajeJson.getString("tipo"));
-                    EnumEnvido env = null;
-                    int intEnv     = Integer.parseInt(mensajeJson.getString("tipo"));
-                    
-                    switch(intEnv) {
-                        case 1:
-                            env = EnumEnvido.ENVIDO;
-                            break;
-                        case 2:
-                            env = EnumEnvido.ENVIDO_ENVIDO;
-                            break;
-                        case 3:
-                            env = EnumEnvido.REAL_ENVIDO;
-                            break;
-                        case 4:
-                            env = EnumEnvido.FALTA_ENVIDO;
-                    }
-                    
-                    try {
-                         t.getEnvido().agregarEnvido(env);
-                        t.cambiarTurno();
-                        this.avisoCambioTurno();
-                        avisoJugadorCantoEnvido(t.getJugadorDos(), t.getJugadorUno(), intEnv, env);
-                    } catch(ExcepcionEnvido ee) {
-                         this.mensajeAjugador(t.getJugadorDos(), ee.getMessage());
-                    }
-                }
-                if (mensajeJson.getString("accion").equals("envidoAceptado")) {
-                    this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
-                    this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
-                }
-                if (mensajeJson.getString("accion").equals("irseMazo")) {
-                    LOGGER.info("Jugador dos se fue al mazo");
-                    this.jugadoresDevuelvenCartas();
-                    this.darCartasJugadores();
-                    t.cambiarMano();
-                    this.avisarInicioMano(t.getJugadorUno());
-                    this.avisarInicioMano(t.getJugadorDos());
+                switch (mensajeJson.getString("accion")) {
+                    case "entraJuego":
+                        // seteando nombre del jugador
+                        t.getJugadorDos().setNombre( mensajeJson.getString("nombre") );
+                        LOGGER.log(Level.INFO, "Jugador dos se llama : {0}", t.getJugadorDos().getNombre());
+                        // se inicia la partida
+                        this.comenzarPartida();
+                        break;
+                    case "cantoEnvido":
+                        int intEnv     = Integer.parseInt(mensajeJson.getString("tipo"));
+                        this.atenderCantoEnvido(t.getJugadorDos(), t.getJugadorUno(), intEnv);
+                        break;
+                    case "envidoAceptado":
+                        this.mensajeAjugador(t.getJugadorUno(), t.resultadoJsonEnvido().get("jugadorUno").toString());
+                        this.mensajeAjugador(t.getJugadorDos(), t.resultadoJsonEnvido().get("jugadorDos").toString());
+                        break;
+                    case "irseMazo":
+                        LOGGER.info("Jugador dos se fue al mazo");
+                        this.jugadoresDevuelvenCartas();
+                        this.darCartasJugadores();
+                        t.cambiarMano();
+                        this.avisarInicioMano(t.getJugadorUno());
+                        this.avisarInicioMano(t.getJugadorDos());
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -223,6 +184,8 @@ public class Servidor {
     private void comenzarPartida() {
         t.turnoPrimeraMano();
         this.darCartasJugadores();
+        t.reiniciarEnvido();
+        
         // ya entregadas las cartas a los jugadores (servidor/modelo) se le 
         // envian dichas cartas a cada jugador (cliente) en formato json
         mensajeInicial(t.getJugadorUno());
@@ -279,6 +242,40 @@ public class Servidor {
         LOGGER.info("Todos los jugadores devolvieron las cartas");
     }
    
+    
+    private void atenderCantoEnvido(Jugador origen, Jugador destino, int tipoEnvido) {
+        EnumEnvido env = null;
+         switch(tipoEnvido) {
+             case 1:
+                 env = EnumEnvido.ENVIDO;
+                 break;
+             case 2:
+                 env = EnumEnvido.ENVIDO_ENVIDO;
+                 break;
+             case 3:
+                 env = EnumEnvido.REAL_ENVIDO;
+                 break;
+             case 4:
+                 env = EnumEnvido.FALTA_ENVIDO;
+         }  
+         try {
+            t.jugadorCantaEnvido(env);
+            LOGGER.info("Jugador: " + origen.getNombre() + " canta: " + env);
+             t.cambiarTurno();
+             LOGGER.info("Se cambio de turno");
+             this.avisoCambioTurno(t.getJugadorUno());
+             this.avisoCambioTurno(t.getJugadorDos());
+             avisoInfoEnvido("infoEnvido", origen, "Esperando respuesta de: " + destino.getNombre());
+             
+             avisoInfoEnvido("logEnvido", origen, "Vos cantaste " + env);
+             avisoInfoEnvido("logEnvido", destino, "El canto " + env);
+             avisoJugadorCantoEnvido(origen, destino, tipoEnvido, env);
+         } catch(ExcepcionEnvido ee) {
+             avisoInfoEnvido("errorEnvido", origen, ee.getMessage());
+         }
+    }
+    
+    
     /**
      * Metodo que le envia un mensaje json al jugador indicando que el otro jugador
      * canto envido.
@@ -295,15 +292,24 @@ public class Servidor {
         mensajeAjugador(destino, msgJ.toString());
     }
     
-    private void avisoCambioTurno() {
-        LOGGER.info("cambio de turno...");
+    private void avisoInfoEnvido(String accion, Jugador j, String s) {
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject msgJ       = provider.createObjectBuilder()
+            .add("accion",  accion)
+            .add("mensaje", s)
+            .build();
+        mensajeAjugador(j, msgJ.toString());
+    }
+    
+    private void avisoCambioTurno(Jugador j) {
         JsonProvider provider = JsonProvider.provider();
         JsonObject msgJ       = provider.createObjectBuilder()
             .add("accion",      "cambioTurno")
             .add("nombreTurno", t.getJugadorTurno().getNombre())
+            .add("tuTurno", t.getJugadorTurno() == j)
             .build();
-        mensajeAjugador(t.getJugadorUno(), msgJ.toString());
-        mensajeAjugador(t.getJugadorDos(), msgJ.toString());
+        mensajeAjugador(j, msgJ.toString());
+        //mensajeAjugador(t.getJugadorDos(), msgJ.toString());
     }
     private void avisoRelogPagina(Jugador j) {
         if (j.getSesion() == null) return;

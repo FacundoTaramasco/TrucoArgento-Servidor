@@ -26,5 +26,13 @@ public class Pruebas {
             System.out.println(ee.getMessage());
         }
 
+        int x = 2;
+        
+        if (x == 1) {
+            System.out.println("1");
+        } else if(x ==2) {
+            System.out.println("2");
+        }
+        
     }
 }
